@@ -1,5 +1,0 @@
-sort -t"," -k2n,2 common_unique_counts.csv > common_unique_counts_sort_numeric.csv
-
-grep COMMON bnf_words_out_5.txt | cut -f 3 -d ','
-
-grep COMMON bnf_words_out_5.txt | cut -f 3,4
