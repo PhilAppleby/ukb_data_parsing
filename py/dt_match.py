@@ -21,6 +21,7 @@ from optparse import OptionParser
 from datahelper import Datahelper
 
 def main(options):
+  dcount = 0
   count = 0
   match_count = 0
   miss_count = 0
@@ -29,7 +30,8 @@ def main(options):
   try:
     fh = open(options.clsfile, "r")
     dh = Datahelper()
-    cls_words = dh.load_cls_words(fh)
+    dcount = dh.load_cls_phrases(fh)
+    #print "Dictionary size = %d" % (dcount)
   except IOError as e:
     print "I/O error({0}): {1}".format(e.errno, e.strerror)
     print "I/O error:", sys.exc_info()
@@ -43,33 +45,29 @@ def main(options):
     exit()
 
   # stdin used to read in medications coding data
+  #sd = dh.get_phrase_dictionary()
+  #for key in sd:
+  #  print key
   hdr = sys.stdin.readline()
   for line in sys.stdin:
     count += 1
-    data = line.strip().split('|')
-    desc_words = dh.get_normalised_sentence(data[1].lower()).split()
-    ngram = ""
-    code = None
-    if len(desc_words) > 2:
-      ngram = ' '.join(desc_words[0:3])
-      if ngram in cls_words:
-        code = dh.get_most_common(cls_words[ngram])
-    if len(desc_words) > 1 and code == None:
-      ngram = ' '.join(desc_words[0:2])
-      if ngram in cls_words:
-        code = dh.get_most_common(cls_words[ngram])
-    if code == None:
-      for ngram in desc_words:
-        if (dh.isExcludedWord(ngram) != True) and dh.isMeasure(ngram) != True and dh.isSingleLetter(ngram) != True:
-          if ngram in cls_words:
-            code = dh.get_most_common(cls_words[ngram])
-            break
-    if code != None:
-      #print "%s,%s,%s,%s,%s" % (data[0], data[1], ngram, code, str(cls_lookup[code]))
-      print "%s,%s,%s,%s" % (data[0], data[1], ngram, code)
-      match_count += 1
-    else:
-      print "%s,%s,%s,%s" % (data[0], data[1], ngram, "NA")
+    matched = False
+    data = line.strip().split(',')
+    all_phrases = [data[1]]
+    if len(data) == 3:
+      all_phrases += data[2].split('|')
+
+    match_string = ""
+    for phrase in all_phrases:
+      code, match_string = dh.match_phrase(phrase)
+      if code != None:
+        print "%s,%s,%s,%s" % (data[0], data[1], match_string, code)
+        match_count += 1
+        matched = True
+        break
+    # never matched in the previous 'for' loop
+    if matched == False:
+      print "%s,%s,%s,%s" % (data[0], data[1], match_string, "NA")
       miss_count += 1
 
   #for word in cls_words:

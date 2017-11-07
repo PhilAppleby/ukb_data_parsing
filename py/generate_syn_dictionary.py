@@ -10,20 +10,25 @@ import json
 def main():
   count = 0
   synonyms = {}
+  codes = {}
 
   for line in sys.stdin:
-    type_syns = line.strip().split('|')
+    data = line.strip().split(',')
+    type_syns = data[0].split('|')
     syns = [x.split(':')[1].strip() for x in type_syns]
     for syn in syns:
       if syn not in synonyms:
         synonyms[syn] = [] 
+        codes[syn] = []
+      if data[1] not in codes[syn]:
+        codes[syn].append(data[1])
       for altsyn in syns:
         if altsyn not in synonyms[syn]:
           synonyms[syn].append(altsyn)
         
 
   for syn in synonyms:
-    print "%s,%s" % (syn, '|'.join(synonyms[syn]))
+    print "%s\t%s\t%s" % (syn, '|'.join(synonyms[syn]), '|'.join(codes[syn]))
     count += 1
   return count
 

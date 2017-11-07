@@ -3,7 +3,8 @@ from collections import Counter
 
 class Datahelper:
   def __init__(self):
-  	self.excluded_words = {
+    self.cls_phrases = {}
+    self.excluded_words = {
       'over': 1,
       'the': 1,
       'counter': 1,
@@ -11,6 +12,8 @@ class Datahelper:
       'a': 1, # this will be handled by the single letter test
       'it': 1,
       'in': 1,
+      'on': 1,
+      'non': 1,
       'of': 1,
       'to': 1,
       'co': 1,
@@ -18,6 +21,7 @@ class Datahelper:
       'st': 1,
       'app': 1,
       'and': 1,
+      'aid': 1,
       'for': 1,
       'with': 1,
       'other': 1,
@@ -27,11 +31,13 @@ class Datahelper:
       'gel': 1,
       'oil': 1,
       'cream': 1,
+      'aloe': 1,
       'solution': 1,
       'soluble': 1,
       'suspension': 1,
       'liquid': 1,
       'tablet': 1,
+      'tab': 1,
       'tablets': 1,
       'pill': 1,
       'pills': 1,
@@ -41,6 +47,7 @@ class Datahelper:
       'ointment': 1,
       'effervescent': 1,
       'capsule': 1,
+      'cap': 1,
       'suppository': 1,
       'supplement': 1,
       'compound': 1,
@@ -94,13 +101,11 @@ class Datahelper:
       'caramel': 1,
       'natural': 1,
       'vitamin': 1,
-      'chondroitin': 1,
       'enzyme': 1,
       'bio': 1,
       'product': 1,
       'kit': 1,
       'cold': 1,
-      'constipation': 1,
       'dry': 1,
       'unknown': 1,
       'free': 1,
@@ -114,11 +119,91 @@ class Datahelper:
       'litre': 1,
       'actuated': 1,
       'vantage': 1,
+      'numark': 1,
+      'care': 1,
+      'galpharm': 1,
       'pharmacy': 1,
-      'heartburn': 1,
       'fish': 1,
+      'aluminium': 1,
+      'sodium': 1,
+      'zinc': 1,
+      'acid': 1,
+      'forte': 1,
+      'simple': 1,
+      'plus': 1,
+      'multi': 1,
+      'adult': 1,
   }
 
+  def load_cls_phrases(self, fh):
+    hdr = fh.readline()
+    for line in fh:
+      data = line.strip().split(',')
+      # guards against unparseable debug lines
+      if len(data) < 2:
+        continue
+      code = data[0]
+      phrase_array = [data[1].lower().strip()]
+      if len(data) > 2:
+        phrase_array += data[2].lower().strip().split('|')
+    
+      for phrase in phrase_array:
+        for key in self.get_key_list(phrase):
+          if key not in self.cls_phrases:
+            self.cls_phrases[key] = []
+          self.cls_phrases[key].append(code)
+
+    return len(self.cls_phrases)
+
+  def get_phrase_dictionary(self):
+    return self.cls_phrases
+
+  def match_phrase(self, phrase):
+    """
+    Attempt to match the argument phrase to the cls_phrases dictionary 
+    (built from all words passed in at init time)
+    A phrase is matched iff:
+    The whole string matches matches OR
+    The prefix trigram matches OR
+    The prefix bigram matches OR
+    A single word, which is not an excluded word, matches  
+
+    Return:
+    A matched code from the classification system or None
+    """
+    key = None
+    match_phrase = None
+    for key in self.get_key_list(phrase):
+      if key in self.cls_phrases:
+        match_phrase = key
+        break
+    
+    if match_phrase == None:
+      return None, key
+    return self.get_most_common(self.cls_phrases[match_phrase]), key
+
+  def get_key_list(self, phrase):
+    ngram = self.get_normalised_phrase(phrase)
+    key_list = [ngram]
+    word_list = ngram.split()
+    if len(word_list) > 2:
+      key_list.append(' '.join(word_list[0:3]))
+    if len(word_list) > 1:
+      key_list.append(' '.join(word_list[0:2]))
+
+    for word in [x for x in word_list if self.isExcluded(x.strip()) == False]:
+      key_list.append(word)
+
+    return key_list
+
+  def isExcluded(self, word):
+    """
+    """
+    if self.isExcludedWord(word) == False: 
+      if self.isMeasure(word) == False:
+        if self.isSingleLetter(word) == False:
+          return False
+    return True 
 
   def isExcludedWord(self, word):
     """
@@ -134,8 +219,8 @@ class Datahelper:
     data = Counter(lst)
     return data.most_common(1)[0][0]
 
-  def get_normalised_sentence(self, sentence):
-  	return re.sub(r'[\W_ ]+', ' ', sentence)
+  def get_normalised_phrase(self, sentence):
+  	return re.sub(r'[\W_ ]+', ' ', sentence).lower()
 
   def format_bnf_code(self, code):
     code = code.strip()
@@ -147,15 +232,6 @@ class Datahelper:
     if ss != '00':
       return "%d.%d.%d" % (int(ch),int(s),int(ss))
     return "%d.%d" % (int(ch),int(s))
-
-#def isMeasure(word):
-#  """
-#  Check is the word is a measure - digits followed by measurement abbreviations
-#  or full words
-#  """
-#  if (re.match('^\d+(m*g|m*l|micrograms)$', word)) != None:
-#    return True
-#  return False
 
   def isMeasure(self, word):
     """
