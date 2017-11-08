@@ -19,6 +19,7 @@ class Datahelper:
       'co': 1,
       'vi': 1,
       'st': 1,
+      'bp': 1,
       'app': 1,
       'and': 1,
       'aid': 1,
@@ -96,6 +97,7 @@ class Datahelper:
       'orange': 1,
       'buff': 1,
       'golden': 1,
+      'white': 1,
       'paediatric': 1,
       'mint': 1,
       'caramel': 1,
@@ -133,6 +135,7 @@ class Datahelper:
       'plus': 1,
       'multi': 1,
       'adult': 1,
+      'liver': 1,
   }
 
   def load_cls_phrases(self, fh):
@@ -241,9 +244,9 @@ class Datahelper:
     OR
     Do we have a stand alone measure symbol
     """
-    if (re.match('^\d+', word)) != None:
-      return True
-    if (re.match('^(m*g|m*l|micrograms)$', word)) != None:
+    #if (re.match('^\d+', word)) != None:
+    #  return True
+    if (re.match('(m*g|m*l|micrograms)$', word)) != None:
       return True
     return False
 

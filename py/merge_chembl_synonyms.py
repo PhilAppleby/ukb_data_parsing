@@ -31,6 +31,7 @@ def main(options):
   try:
     fh = open(options.synfile, "r")
     synonyms = load_synonyms(fh)
+    #print len(synonyms)
   except IOError as e:
     print "I/O error({0}): {1}".format(e.errno, e.strerror)
     exit()
@@ -48,8 +49,8 @@ def main(options):
     phrase = data[1].lower()
     matched = False
     for key in dh.get_key_list(phrase):
-      if phrase in synonyms:
-        print "%s,%s,%s" % (data[0], phrase, '|'.join(synonyms[phrase]))
+      if key in synonyms:
+        print "%s,%s,%s" % (data[0], phrase, '|'.join(synonyms[key]))
         matched = True
         mcount += 1
         break
@@ -72,5 +73,5 @@ parser.add_option("-s", "--synfile", dest="synfile",
 (options, args) = parser.parse_args()
 
 count, mcount = main(options)
-print "END:", time.time() - start_time, "seconds", count, mcount
+#print "END:", time.time() - start_time, "seconds", count, mcount
 

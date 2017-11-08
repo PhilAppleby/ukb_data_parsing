@@ -10,7 +10,7 @@ import json
 def main():
   count = 0
   synonyms = {}
-  codes = {}
+  #codes = {}
 
   for line in sys.stdin:
     data = line.strip().split(',')
@@ -19,16 +19,17 @@ def main():
     for syn in syns:
       if syn not in synonyms:
         synonyms[syn] = [] 
-        codes[syn] = []
-      if data[1] not in codes[syn]:
-        codes[syn].append(data[1])
+        #codes[syn] = []
+      #if data[1] not in codes[syn]:
+      #  codes[syn].append(data[1])
       for altsyn in syns:
         if altsyn not in synonyms[syn]:
           synonyms[syn].append(altsyn)
         
 
   for syn in synonyms:
-    print "%s\t%s\t%s" % (syn, '|'.join(synonyms[syn]), '|'.join(codes[syn]))
+    #print "%s\t%s\t%s" % (syn, '|'.join(synonyms[syn]), '|'.join(codes[syn]))
+    print "%s\t%s" % (syn, '|'.join(synonyms[syn]))
     count += 1
   return count
 

@@ -19,7 +19,7 @@ def main():
     data = line.strip().split('\t')
 #    print data
     if data[0] != last_molno and last_molno != "":
-      print '|'.join(related_synonyms) + "," + last_molno
+      print '|'.join(related_synonyms) + "|MOLREGNO:" + last_molno
       related_synonyms = []
     last_molno = data[0]
     text = dh.get_normalised_phrase(data[1])
@@ -28,7 +28,7 @@ def main():
     if syn not in related_synonyms:
       related_synonyms.append(syn)
 
-  print '|'.join(related_synonyms) + "," + last_molno
+  print '|'.join(related_synonyms) + "|MOLREGNO:" + last_molno
 
 # execution flow starts here
 #
