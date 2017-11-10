@@ -44,12 +44,13 @@ def main(options):
     cols.append(0)
     # Process the header record to capture column indices and build the output 
     # header record
-    for i, col in enumerate(hdr):
-      coldata=col.split('-')
-      if coldata[0] in colprefs:
-        outhdr.append(col)
-        #print i, coldata
-        cols.append(i)
+    for colpref in colprefs:
+      for i, col in enumerate(hdr):
+        coldata=col.split('-')
+        if coldata[0] == colpref:
+          outhdr.append(col)
+          #print i, coldata
+          cols.append(i)
     print ",".join(outhdr)
     #print cols
     #print len(outhdr)
@@ -58,9 +59,11 @@ def main(options):
       outrec=[]
       count += 1
       # iterate over each row element
-      for i,elem in enumerate(row):
-        if i in cols:
-          outrec.append(elem)
+#      for i,elem in enumerate(row):
+#        if i in cols:
+#          outrec.append(elem)
+      for idx in cols:
+        outrec.append(row[idx])
       print ",".join(outrec)
   except:
     print "Unexpected error (2):", sys.exc_info()[0]
@@ -74,7 +77,7 @@ def main(options):
 parser = OptionParser()
 parser.add_option("-c", "--csvfile", dest="csvfile",
   help="csv file containing main UKB data", metavar="FILE")
-# col prefixes are comma separated - no complaint is mage of a prefix doesn't exist in the data
+# col prefixes are comma separated - no complaint is made if a prefix doesn't exist in the data
 parser.add_option("-p", "--colprefs", dest="colprefs",
   help="UKB column prefixes", metavar="FILE")
 

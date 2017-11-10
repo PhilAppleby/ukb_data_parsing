@@ -85,6 +85,7 @@ class Datahelper:
       'fat': 1,
       'aloe': 1,
       'iu': 1,
+      'health': 1,
       'cover': 1,
       'bath': 1,
       'powder': 1,
@@ -136,6 +137,11 @@ class Datahelper:
       'multi': 1,
       'adult': 1,
       'liver': 1,
+      'factor': 1,
+      'human': 1,
+      'bp': 1,
+      'sd': 1,
+      'hp': 1,
   }
 
   def load_cls_phrases(self, fh):
@@ -160,6 +166,42 @@ class Datahelper:
 
   def get_phrase_dictionary(self):
     return self.cls_phrases
+
+  def match_all_phrases(self, inphrases):
+    """
+    Attempt to match the argument phrases to the cls_phrases dictionary 
+    First attempt a match of all phrase, then all trigrams, then all
+    bigrams, then single words 
+
+    Return:
+    A matched code from the classification system or None
+    """
+    phrase = ""
+    # all full phrases 
+    for phrase in inphrases:
+      if phrase in self.cls_phrases:
+        return self.get_most_common(self.cls_phrases[phrase]), phrase
+
+    phrases = [self.get_normalised_phrase(p) for p in inphrases]
+    # all prefix trigrams 
+    for ngram in [p.split()[0:3] for p in phrases if len(p.split()) > 3]:
+      phrase = ' '.join(ngram)
+      if phrase in self.cls_phrases:
+        return self.get_most_common(self.cls_phrases[phrase]), phrase
+
+    # all prefix bigrams 
+    for ngram in [p.split()[0:2] for p in phrases if len(p.split()) > 1]:
+      phrase = ' '.join(ngram)
+      if phrase in self.cls_phrases:
+        return self.get_most_common(self.cls_phrases[phrase]), phrase
+
+    # all valid words 
+    for phr_elem in phrases:
+      for phrase in [w for w in phr_elem.split() if self.isExcluded(w.strip()) == False]:
+        if phrase in self.cls_phrases:
+          return self.get_most_common(self.cls_phrases[phrase]), phrase
+
+    return None, phrase
 
   def match_phrase(self, phrase):
     """
@@ -246,7 +288,7 @@ class Datahelper:
     """
     #if (re.match('^\d+', word)) != None:
     #  return True
-    if (re.match('(m*g|m*l|micrograms)$', word)) != None:
+    if (re.match('(^\d+m*g|m*l|mcg|micrograms)$', word)) != None:
       return True
     return False
 
