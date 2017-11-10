@@ -33,6 +33,9 @@ class Datahelper:
       'oil': 1,
       'cream': 1,
       'aloe': 1,
+      'preparation': 1,
+      'preparations': 1,
+      'shampoo': 1,
       'solution': 1,
       'soluble': 1,
       'suspension': 1,
@@ -131,6 +134,11 @@ class Datahelper:
       'sodium': 1,
       'zinc': 1,
       'acid': 1,
+      'alcohol': 1,
+      'coal': 1,
+      'tar': 1,
+      'extract': 1,
+      'mineral': 1,
       'forte': 1,
       'simple': 1,
       'plus': 1,
@@ -140,6 +148,7 @@ class Datahelper:
       'factor': 1,
       'human': 1,
       'bp': 1,
+      'pf': 1,
       'sd': 1,
       'hp': 1,
   }
@@ -176,32 +185,49 @@ class Datahelper:
     Return:
     A matched code from the classification system or None
     """
+#   temporary - attempted matches
+    attempted_matches = []
     phrase = ""
-    # all full phrases 
+    step = "A"
+    # ALL all full phrases 
     for phrase in inphrases:
+      attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
-        return self.get_most_common(self.cls_phrases[phrase]), phrase
+        return self.get_most_common(self.cls_phrases[phrase]), attempted_matches
 
     phrases = [self.get_normalised_phrase(p) for p in inphrases]
-    # all prefix trigrams 
+
+    # all normalised phrases 
+    #for phrase in phrases:
+    #  attempted_matches.append(phrase)
+    #  if phrase in self.cls_phrases:
+    #    return self.get_most_common(self.cls_phrases[phrase]), attempted_matches
+
+    # 3 all prefix trigrams 
+    step = "3"
     for ngram in [p.split()[0:3] for p in phrases if len(p.split()) > 3]:
       phrase = ' '.join(ngram)
+      attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
-        return self.get_most_common(self.cls_phrases[phrase]), phrase
+        return self.get_most_common(self.cls_phrases[phrase]), attempted_matches
 
-    # all prefix bigrams 
-    for ngram in [p.split()[0:2] for p in phrases if len(p.split()) > 1]:
+    # 2 all prefix bigrams 
+    step = "2"
+    for ngram in [p.split()[0:2] for p in phrases if len(p.split()) > 2]:
       phrase = ' '.join(ngram)
+      attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
-        return self.get_most_common(self.cls_phrases[phrase]), phrase
+        return self.get_most_common(self.cls_phrases[phrase]), attempted_matches
 
-    # all valid words 
+    # 1 all valid words 
+    step = "1"
     for phr_elem in phrases:
       for phrase in [w for w in phr_elem.split() if self.isExcluded(w.strip()) == False]:
+        attempted_matches.append(phrase + ':' + step)
         if phrase in self.cls_phrases:
-          return self.get_most_common(self.cls_phrases[phrase]), phrase
+          return self.get_most_common(self.cls_phrases[phrase]), attempted_matches
 
-    return None, phrase
+    return None, attempted_matches
 
   def match_phrase(self, phrase):
     """
@@ -286,9 +312,11 @@ class Datahelper:
     OR
     Do we have a stand alone measure symbol
     """
-    #if (re.match('^\d+', word)) != None:
-    #  return True
-    if (re.match('(^\d+m*g|m*l|mcg|micrograms)$', word)) != None:
+    if (re.match('^\d\d$', word)) != None:
+      return True
+    if (re.match('^\d\d\d$', word)) != None:
+      return True
+    if (re.match('^\d*(m*g|m*l|mcg|micrograms)$', word)) != None:
       return True
     return False
 

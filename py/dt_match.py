@@ -58,28 +58,14 @@ def main(options):
       all_phrases += data[2].split('|')
 
     match_string = ""
-    code, match_string = dh.match_all_phrases(all_phrases)
+    code, match_data = dh.match_all_phrases(all_phrases)
     if code != None:
-      print "%s,%s,%s,%s" % (data[0], data[1], match_string, code)
+      print "%s,%s,%s,%s" % (data[0], data[1], str(match_data), code)
       match_count += 1
     else:      
-      print "%s,%s,%s,%s" % (data[0], data[1], match_string, "NA")
+      print "%s,%s,%s,%s" % (data[0], data[1], str(match_data), "NA")
       miss_count += 1
-    #for phrase in all_phrases:
-    #  code, match_string = dh.match_phrase(phrase)
-    #  if code != None:
-    #    print "%s,%s,%s,%s" % (data[0], data[1], match_string, code)
-    #    match_count += 1
-    #    matched = True
-    #    break
-    # never matched in the previous 'for' loop
-    #if matched == False:
-    #  print "%s,%s,%s,%s" % (data[0], data[1], match_string, "NA")
-    #  miss_count += 1
 
-  #for word in cls_words:
-  #  cls_dict_count += 1
-  #  print "%s -> %s" % (word, str(cls_words[word]))
   return count, match_count, miss_count 
 
 

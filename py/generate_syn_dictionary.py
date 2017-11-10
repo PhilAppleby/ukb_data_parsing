@@ -29,7 +29,7 @@ def main():
 
   for syn in synonyms:
     #print "%s\t%s\t%s" % (syn, '|'.join(synonyms[syn]), '|'.join(codes[syn]))
-    print "%s\t%s" % (syn, '|'.join(synonyms[syn]))
+    print "%s\t%s" % (syn, '|'.join(set(synonyms[syn])))
     count += 1
   return count
 
