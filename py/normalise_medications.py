@@ -19,7 +19,7 @@ def main():
 
   for line in sys.stdin:
     data = line.strip().split(',')
-    for elem in data[4:]:
+    for elem in data[1:]:
       if elem != "":
         print "%s,%s" % (data[0], elem)
 
