@@ -352,8 +352,9 @@ class Datahelper:
     return self.get_most_common(self.cls_phrases[match_phrase]), key
 
   def get_key_list(self, phrase):
+    key_list = [phrase]
     ngram = self.get_normalised_phrase(phrase)
-    key_list = [ngram]
+    key_list.append(ngram)
     word_list = ngram.split()
     if len(word_list) > 3:
       key_list.append(' '.join(word_list[0:3]))
