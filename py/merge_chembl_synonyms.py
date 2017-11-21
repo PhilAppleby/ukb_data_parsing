@@ -53,7 +53,7 @@ def main(options):
         print "%s,%s,%s" % (data[0], phrase, '|'.join(synonyms[key]))
         matched = True
         mcount += 1
-        break
+        #break
     if matched == False:
       print "%s,%s" % (data[0], phrase)
 
