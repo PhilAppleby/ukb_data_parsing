@@ -27,7 +27,7 @@ def main():
           synonyms[syn].append(altsyn)
         
 
-  for syn in synonyms:
+  for syn in sorted(synonyms):
     #print "%s\t%s\t%s" % (syn, '|'.join(synonyms[syn]), '|'.join(codes[syn]))
     print "%s\t%s" % (syn, '|'.join(set(synonyms[syn])))
     count += 1

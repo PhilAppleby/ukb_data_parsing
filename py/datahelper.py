@@ -1,11 +1,30 @@
 import re
 from collections import Counter
-
+#
+# Methods for assisting with matching,
+# generating dictionary and matching keys,
+# listing exclusion words and applying exclusion rules
+# 
+#
+# Problematic Words and Phrases (may end up excluding these for
+# certain code systems
+#
+# cyclosporin
+# diflucan
+# ethinyloestradiol
+# vibramycin
+# clioquinol
+# decongestant
+# erythomycin
+# ethinylestradiol
+# oestradiol
+#
 class Datahelper:
   def __init__(self):
     self.cls_phrases = {}
 # Explicit exclusions - short words and measures are taken out elsewhere
     self.excluded_words = {
+      'acting': 1,
       'active': 1,
       'activated': 1,
       'artificial': 1,
@@ -27,10 +46,12 @@ class Datahelper:
       'dome': 1,
       'continus': 1,
       'depot': 1,
+      'mini': 1,
       'micro': 1,
       'over': 1,
       'long': 1,
       'slow': 1,
+      'daily': 1,
       'hayfever': 1,
       'counter': 1,
       'mild': 1,
@@ -47,11 +68,13 @@ class Datahelper:
       'needs': 1,
       'aloe': 1,
       'infusion': 1,
+      'prep': 1,
       'preparation': 1,
       'preparations': 1,
       'preps': 1,
       'shampoo': 1,
       'shower': 1,
+      'wash': 1,
       'enema': 1,
       'soap': 1,
       'solution': 1,
@@ -64,6 +87,8 @@ class Datahelper:
       'emulsifying': 1,
       'lotion': 1,
       'lotio': 1,
+      'derm': 1,
+      'aveeno': 1,
       'soluble': 1,
       'suspension': 1,
       'paint': 1,
@@ -110,10 +135,12 @@ class Datahelper:
       'syrup': 1,
       'dried': 1,
       'castor': 1,
+      'oilatum': 1,
       'oily': 1,
       'salt': 1,
       'salts': 1,
       'saline': 1,
+      'yeast': 1,
       'tears': 1,
       'ophthalmic': 1,
       'complexes': 1,
@@ -128,6 +155,7 @@ class Datahelper:
       'drug': 1,
       'lozenge': 1,
       'lozenges': 1,
+      'nasal': 1,
       'spray': 1,
       'paste': 1,
       'tincture': 1,
@@ -137,6 +165,7 @@ class Datahelper:
       'applicator': 1,
       'ampoule': 1,
       'syringe': 1,
+      'topical': 1,
       'duopack': 1,
       'pack': 1,
       'combination': 1,
@@ -146,6 +175,7 @@ class Datahelper:
       'patch': 1,
       'gastro': 1,
       'resistant': 1,
+      'allergy': 1,
       'relief': 1,
       'wool': 1,
       'sand': 1,
@@ -185,11 +215,13 @@ class Datahelper:
       'vitamins': 1,
       'enzyme': 1,
       'product': 1,
+      'junior': 1,
       'cold': 1,
       'unknown': 1,
       'free': 1,
       'body': 1,
       'nose': 1,
+      'sinus': 1,
       'stomach': 1,
       'scalp': 1,
       'intramuscular': 1,
@@ -208,10 +240,33 @@ class Datahelper:
       'aluminium': 1,
       'calcium': 1,
       'sodium': 1,
-      'sodium chloride': 1,
+      'potassium': 1,
+      'chloride': 1,
+      'nitrate': 1,
+      'salicylic': 1,
+      'hydrochloride': 1,
       'disodium': 1,
       'zinc': 1,
       'magnesium': 1,
+      'betamethasone': 1,
+      'dexamethasone': 1,
+      'hydrocortisone': 1,
+      'triamcinolone': 1,
+      'prednisolone': 1,
+      'chloromycetin': 1,
+      'chlorhexidine': 1,
+      'canesten': 1,
+      'anusol': 1,
+      'nystatin': 1,
+      'calmurid': 1,
+      'fucibet': 1,
+      'fucidin': 1,
+      'betnesol': 1,
+      'tobradex': 1,
+      'nystaform': 1,
+      'orabase': 1,
+      'betnovate': 1,
+      'polystyrene': 1,
       'undecenoic': 1,
       'oxide': 1,
       'phosphate': 1,
@@ -228,6 +283,7 @@ class Datahelper:
       'coal': 1,
       'extract': 1,
       'mineral': 1,
+      'minerals': 1,
       'forte': 1,
       'simple': 1,
       'plus': 1,
@@ -235,11 +291,14 @@ class Datahelper:
       'vita': 1,
       'adult': 1,
       'liver': 1,
+      'skin': 1,
       'factor': 1,
       'human': 1,
       'methyl': 1,
       'piperazine': 1,
       'deep': 1,
+      'ultra': 1,
+      'daktarin': 1,
   }
 
   def load_cls_phrases(self, fh):
@@ -255,13 +314,16 @@ class Datahelper:
         syn_array = data[2].lower().strip().split('|')
         for syn in [s for s in syn_array if s not in phrase_array]:
           phrase_array.append(syn) 
-    
+
+      #already_seen = {} 
       for phrase in phrase_array:
         for key in set(self.get_key_list(phrase)):
+          #print "LOAD %s" % (key)
           if key not in self.cls_phrases:
             self.cls_phrases[key] = []
-          #print "%s -> %s" % (key, str(code))
+          #if code not in already_seen:
           self.cls_phrases[key].append(code)
+          #already_seen[code] = 1
 
     return len(self.cls_phrases)
 
@@ -287,12 +349,15 @@ class Datahelper:
     attempted_matches = []
     phrase = ""
     step = "A"
-    # ALL all full phrases 
+    # ALL full phrases 
     for phrase in inphrases:
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
-        return self.get_most_common(self.cls_phrases[phrase]), attempted_matches, phrase
+        match_choices = self.cls_phrases[phrase]
+        #return match_choices, attempted_matches, phrase
+        return self.get_list_counts(match_choices), attempted_matches, phrase, self.get_most_common(match_choices)
 
+    # Normalised version of ALL all full phrases 
     phrases = [self.get_normalised_phrase(p) for p in inphrases]
 
     # all normalised phrases 
@@ -307,7 +372,8 @@ class Datahelper:
       phrase = ' '.join(ngram)
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
-        return self.get_most_common(self.cls_phrases[phrase]), attempted_matches, phrase
+        match_choices = self.cls_phrases[phrase]
+        return self.get_list_counts(match_choices), attempted_matches, phrase, self.get_most_common(match_choices)
 
     # 2 all prefix bigrams 
     step = "2"
@@ -315,7 +381,8 @@ class Datahelper:
       phrase = ' '.join(ngram)
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
-        return self.get_most_common(self.cls_phrases[phrase]), attempted_matches, phrase
+        match_choices = self.cls_phrases[phrase]
+        return self.get_list_counts(match_choices), attempted_matches, phrase, self.get_most_common(match_choices)
 
     # 1 all valid words 
     step = "1"
@@ -323,9 +390,10 @@ class Datahelper:
       for phrase in [w for w in phr_elem.split() if self.isExcluded(w.strip()) == False]:
         attempted_matches.append(phrase + ':' + step)
         if phrase in self.cls_phrases:
-          return self.get_most_common(self.cls_phrases[phrase]), attempted_matches, phrase
+          match_choices = self.cls_phrases[phrase]
+          return self.get_list_counts(match_choices), attempted_matches, phrase, self.get_most_common(match_choices)
 
-    return None, attempted_matches, phrase
+    return [], attempted_matches, phrase, None
 
   def match_phrase(self, phrase):
     """
@@ -352,36 +420,45 @@ class Datahelper:
     return self.get_most_common(self.cls_phrases[match_phrase]), key
 
   def get_key_list(self, phrase):
-    key_list = [phrase]
+    key_list = []
+    if self.isExcluded(phrase) == False:
+      #print "KEY (1) %s" % (phrase)
+      key_list = [phrase]
+
     ngram = self.get_normalised_phrase(phrase)
-    key_list.append(ngram)
+    if self.isExcluded(ngram) == False and ngram not in key_list:
+      #print "KEY (2) %s" % (ngram)
+      key_list.append(ngram)
     word_list = ngram.split()
-    if len(word_list) > 3:
-      key_list.append(' '.join(word_list[0:3]))
     if len(word_list) > 2:
+      key_list.append(' '.join(word_list[0:3]))
+    if len(word_list) > 1:
       key_list.append(' '.join(word_list[0:2]))
 
     for word in [x for x in word_list if self.isExcluded(x.strip()) == False]:
       if word not in key_list:
+        #print "KEY (3) %s" % (word)
+        #print word
         key_list.append(word)
+
+    return key_list
+
+  def get_key_list_whole_phrases(self, phrase):
+    key_list = [phrase]
+    ngram = self.get_normalised_phrase(phrase)
+    key_list.append(ngram)
 
     return key_list
 
   def isExcluded(self, word):
     """
     """
-    if self.isExcludedWord(word) == False: 
-      if self.isMeasure(word) == False:
-        if self.isShortWord(word) == False:
-          return False
-    return True 
+    return (self.isExcludedWord(word) != False) or (self.isMeasure(word) != False) or (self.isShortWord(word) != False)
 
   def isExcludedWord(self, word):
     """
     """
-    if word in self.excluded_words:
-      return True
-    return False 
+    return word in self.excluded_words
 
   def get_most_common(self, lst):
     """
@@ -389,6 +466,13 @@ class Datahelper:
     """
     data = Counter(lst)
     return data.most_common(1)[0][0]
+
+  def get_list_counts(self, lst):
+    """
+    Return counts for data elements in a list
+    """
+    counts = Counter(lst)
+    return [c + "[" + str(counts[c]) + "]" for c in sorted(counts)]
 
   def get_best_guess(self, lst):
     """
@@ -398,6 +482,9 @@ class Datahelper:
     maxlen = 0
     pass
     #for elem in lst:
+
+  def make_pheno_string(self, words):
+  	return re.sub(r' +', '_', words).lower()
 
   def get_normalised_phrase(self, sentence):
   	return re.sub(r'[\W_ ]+', ' ', sentence).lower()
@@ -413,6 +500,9 @@ class Datahelper:
       return "%d.%d.%d" % (int(ch),int(s),int(ss))
     return "%d.%d" % (int(ch),int(s))
 
+  def format_atc_code(self, code):
+    return code[:4]
+
   def isMeasure(self, word):
     """
     The second version of this - does the word
@@ -421,31 +511,19 @@ class Datahelper:
     OR
     Do we have a stand alone measure symbol
     """
-    if (re.match('^\d+$', word)) != None:
-      return True
-    #if (re.match('^\d\d$', word)) != None:
-    #  return True
-    #if (re.match('^\d\d\d$', word)) != None:
-    #  return True
-    if (re.match('^\d*(m*g|m*l|iu|mcg|uml|u1ml|mg4ml|micrograms|million|cm|mm|unit|units|hb)', word)) != None:
-      return True
-    return False
+    return ((re.match('^\d+$', word)) != None) or ((re.match('^\d*(m*g|m*l|iu|mcg|uml|u1ml|mg4ml|micrograms|million|cm|mm|unit|units|hb)', word)) != None)
 
   def isShortWord(self, word):
     """
     Check if the word is longer than 3 chars 
     """
-    if len(word) < 4:
-      return True
-    return False
+    return len(word) < 4
 
   def isSingleLetter(self, word):
     """
     Check if the word consists of a single letter (generated by string
     normalisation)
     """
-    if (re.match('^\w$', word)) != None:
-      return True
-    return False
+    return (re.match('^\w$', word)) != None
 
 

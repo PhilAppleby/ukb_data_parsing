@@ -58,12 +58,12 @@ def main(options):
       all_phrases += data[2].split('|')
 
     match_string = ""
-    code, match_data, last_match = dh.match_all_phrases(all_phrases)
-    if code != None:
-      print "%s,%s,%s,%s,%s" % (data[0], data[1], last_match, '|'.join(match_data), code)
+    code_array, match_data, last_match, selected_code = dh.match_all_phrases(all_phrases)
+    if len(code_array) > 0:
+      print "%s,%s,%s,%s,%s,%s,%d" % (data[0], data[1], last_match, '|'.join(match_data), '|'.join(code_array), selected_code, len(code_array))
       match_count += 1
     else:      
-      print "%s,%s,%s,%s,%s" % (data[0], data[1], last_match, '|'.join(match_data), "NA")
+      print "%s,%s,%s,%s,%s,%s,0" % (data[0], data[1], last_match, '|'.join(match_data), "NA", "NA")
       miss_count += 1
 
   return count, match_count, miss_count 
