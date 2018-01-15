@@ -7,7 +7,7 @@ from collections import Counter
 # 
 #
 # Problematic Words and Phrases (may end up excluding these for
-# certain code systems
+# certain code systems)
 #
 # cyclosporin
 # diflucan
@@ -66,7 +66,8 @@ class Datahelper:
       'cream': 1,
       'need': 1,
       'needs': 1,
-      'aloe': 1,
+#      'aloe': 1,
+      'vera': 1,
       'infusion': 1,
       'prep': 1,
       'preparation': 1,
@@ -91,6 +92,7 @@ class Datahelper:
       'aveeno': 1,
       'soluble': 1,
       'suspension': 1,
+      'various': 1,
       'paint': 1,
       'liquid': 1,
       'tablet': 1,
@@ -169,6 +171,7 @@ class Datahelper:
       'duopack': 1,
       'pack': 1,
       'combination': 1,
+      'combinations': 1,
       'prefilled': 1,
       'continuous': 1,
       'dispersible': 1,
@@ -225,6 +228,7 @@ class Datahelper:
       'stomach': 1,
       'scalp': 1,
       'intramuscular': 1,
+      'sublingual': 1,
       'breath': 1,
       'sleep': 1,
       'drowsy': 1,
@@ -248,16 +252,18 @@ class Datahelper:
       'disodium': 1,
       'zinc': 1,
       'magnesium': 1,
-      'betamethasone': 1,
-      'dexamethasone': 1,
-      'hydrocortisone': 1,
-      'triamcinolone': 1,
-      'prednisolone': 1,
-      'chloromycetin': 1,
-      'chlorhexidine': 1,
-      'canesten': 1,
-      'anusol': 1,
-      'nystatin': 1,
+#      'betamethasone': 1,
+#      'dexamethasone': 1,
+#      'hydrocortisone': 1,
+#      'triamcinolone': 1,
+#      'prednisolone': 1,
+#      'chloromycetin': 1,
+#      'chlorhexidine': 1,
+#      'canesten': 1,
+#      'anusol': 1,
+#      'nystatin': 1,
+      'citrate': 1,
+      'sulfate': 1,
       'calmurid': 1,
       'fucibet': 1,
       'fucidin': 1,
@@ -299,7 +305,10 @@ class Datahelper:
       'deep': 1,
       'ultra': 1,
       'daktarin': 1,
-  }
+    }
+    self.valid_short_words = {
+      'gtn': 1,
+    }
 
   def load_cls_phrases(self, fh):
     #hdr = fh.readline()
@@ -368,7 +377,7 @@ class Datahelper:
 
     # 3 all prefix trigrams 
     step = "3"
-    for ngram in [p.split()[0:3] for p in phrases if len(p.split()) > 3]:
+    for ngram in [p.split()[0:3] for p in phrases if len(p.split()) > 2]:
       phrase = ' '.join(ngram)
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
@@ -377,7 +386,7 @@ class Datahelper:
 
     # 2 all prefix bigrams 
     step = "2"
-    for ngram in [p.split()[0:2] for p in phrases if len(p.split()) > 2]:
+    for ngram in [p.split()[0:2] for p in phrases if len(p.split()) > 1]:
       phrase = ' '.join(ngram)
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
@@ -387,7 +396,9 @@ class Datahelper:
     # 1 all valid words 
     step = "1"
     for phr_elem in phrases:
+      #print phr_elem.split()
       for phrase in [w for w in phr_elem.split() if self.isExcluded(w.strip()) == False]:
+        #print "***", phrase
         attempted_matches.append(phrase + ':' + step)
         if phrase in self.cls_phrases:
           match_choices = self.cls_phrases[phrase]
@@ -443,6 +454,30 @@ class Datahelper:
 
     return key_list
 
+  def get_merge_key_list(self, phrase):
+    key_list = []
+    if self.isExcludedFromMerge(phrase) == False:
+      #print "KEY (1) %s" % (phrase)
+      key_list = [phrase]
+
+    ngram = self.get_normalised_phrase(phrase)
+    if self.isExcluded(ngram) == False and ngram not in key_list:
+      #print "KEY (2) %s" % (ngram)
+      key_list.append(ngram)
+    word_list = ngram.split()
+    if len(word_list) > 2:
+      key_list.append(' '.join(word_list[0:3]))
+    if len(word_list) > 1:
+      key_list.append(' '.join(word_list[0:2]))
+
+    for word in [x for x in word_list if self.isExcludedFromMerge(x.strip()) == False]:
+      if word not in key_list:
+        #print "KEY (3) %s" % (word)
+        #print word
+        key_list.append(word)
+
+    return key_list
+
   def get_key_list_whole_phrases(self, phrase):
     key_list = [phrase]
     ngram = self.get_normalised_phrase(phrase)
@@ -453,6 +488,13 @@ class Datahelper:
   def isExcluded(self, word):
     """
     """
+    #print word
+    return (self.isExcludedWord(word) != False) or (self.isMeasure(word) != False) or (self.isAllDigits(word) != False) or (self.isShortWord(word) != False)
+
+  def isExcludedFromMerge(self, word):
+    """
+    """
+    #print word
     return (self.isExcludedWord(word) != False) or (self.isMeasure(word) != False) or (self.isShortWord(word) != False)
 
   def isExcludedWord(self, word):
@@ -465,6 +507,10 @@ class Datahelper:
     Return the most commonly occuring value in a list
     """
     data = Counter(lst)
+    mc = data.most_common(2) 
+    #if len(mc) == 1 or (mc[0][1] != (mc[1][1])):
+    #  return mc[0][0]
+    #return "AMB"
     return data.most_common(1)[0][0]
 
   def get_list_counts(self, lst):
@@ -472,7 +518,7 @@ class Datahelper:
     Return counts for data elements in a list
     """
     counts = Counter(lst)
-    return [c + "[" + str(counts[c]) + "]" for c in sorted(counts)]
+    return [c + "~" + str(counts[c]) for c in sorted(counts)]
 
   def get_best_guess(self, lst):
     """
@@ -489,35 +535,38 @@ class Datahelper:
   def get_normalised_phrase(self, sentence):
   	return re.sub(r'[\W_ ]+', ' ', sentence).lower()
 
-  def format_bnf_code(self, code):
+  def format_bnf_code(self, code, level=3):
     code = code.strip()
     ch = code[0:2]
     s = code[2:4]
     ss = '00'
     if len(code) >=6:
       ss = code[4:6]
-    if ss != '00':
+    if ss != '00' and level == 3:
       return "%d.%d.%d" % (int(ch),int(s),int(ss))
     return "%d.%d" % (int(ch),int(s))
 
-  def format_atc_code(self, code):
-    return code[:4]
+  def format_atc_code(self, code, size=4):
+    return code[:size]
 
   def isMeasure(self, word):
     """
-    The second version of this - does the word
-    begin with a series of at least 1 digit (can be followed by
-    anything or nothing)
-    OR
     Do we have a stand alone measure symbol
     """
-    return ((re.match('^\d+$', word)) != None) or ((re.match('^\d*(m*g|m*l|iu|mcg|uml|u1ml|mg4ml|micrograms|million|cm|mm|unit|units|hb)', word)) != None)
+    return ((re.match('\d+(mg$|ml$|iu$|mcg$|uml$|u1ml$|mg4ml$|micrograms$|million$|cm$|mm$|unit$|units$|hb$)', word)) != None)
+
+  def isAllDigits(self, word):
+    """
+    Does the word begin with a series of at least 1 digit (can be followed by
+    anything or nothing)
+    """
+    return ((re.match('^\d+$', word)) != None) 
 
   def isShortWord(self, word):
     """
     Check if the word is longer than 3 chars 
     """
-    return len(word) < 4
+    return len(word) < 4 and word not in self.valid_short_words 
 
   def isSingleLetter(self, word):
     """

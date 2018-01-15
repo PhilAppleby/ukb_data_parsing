@@ -1,4 +1,6 @@
 # 
+# Third step in the chembl synonym generation pipeline:
+# python ${PYDIR}/dump_mysql_table_data.py --tablename=molecule_synonyms | sort -n | python ${PYDIR}/parse_chembl_synonyms.py | python ${PYDIR}/generate_syn_dictionary.py > ${CDATADIR}/syn_dict_all.txt
 # 
 import time
 import datetime
@@ -8,6 +10,15 @@ import random
 import json
 
 def main():
+  """
+  For each synonym set of size n (record) in the input: generate n records in
+  which each synonym is the key.
+
+  But special cases need handling:
+  Achieved by building an internal dictionary which allows for synonyms apprearing in more
+  than 1 input record (In CHEMBL terms allows for > 1 molregno having the same synonym in its
+  synonym set)
+  """
   count = 0
   synonyms = {}
   #codes = {}

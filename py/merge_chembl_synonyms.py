@@ -1,4 +1,12 @@
 # 
+# Attempt to match CHEMBL synonyms with coding data
+# - Load a synonym dictionary
+# - Processing up to this point:
+#   dump_mysql_table.py --tablename=molecule_synonyms > ${CDATADIR}/molecule_synonyms.tsv
+#   (this outputs a file with no header, currently)   
+#   sort -n ${CDATADIR}/molecule_synonyms.tsv > ${CDATADIR}/molecule_synonyms_sorted.tsv
+#   
+#   
 # 
 import time
 import datetime
@@ -10,6 +18,10 @@ from optparse import OptionParser
 from datahelper import Datahelper
 
 def load_synonyms(fh):
+  """
+  Load whole synonyms only into a python dictionary
+  which will then be used as a look-up for input data
+  """
   synonyms = {}
 
   for line in fh:
@@ -49,7 +61,7 @@ def main(options):
     data = line.strip().split(',')
     phrase = data[1].lower()
     matched = False
-    for key in dh.get_key_list(phrase):
+    for key in dh.get_merge_key_list(phrase):
       if key in synonyms:
         print "%s,%s,%s" % (data[0], phrase, '|'.join(synonyms[key]))
         matched = True

@@ -16,7 +16,7 @@ def main():
   for line in sys.stdin:
     count += 1
     data = line.strip().split(',')
-    data[0] = dh.format_bnf_code(data[0])
+    data[0] = dh.format_bnf_code(data[0], 3)
     data[1] = data[1].lower()
     print ','.join(data)
 
