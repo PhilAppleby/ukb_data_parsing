@@ -1,6 +1,9 @@
 # 
-# 2nd step in the chembl synonym generation pipeline:
-# python ${PYDIR}/dump_mysql_table_data.py --tablename=molecule_synonyms | sort -n | python ${PYDIR}/parse_chembl_synonyms.py | python ${PYDIR}/generate_syn_dictionary.py > ${CDATADIR}/syn_dict_all.txt
+# Second step in the chembl synonym generation pipeline:
+# python ${PYDIR}/chembl/dump_mysql_table_data.py --tablename=molecule_synonyms | \
+#   sort -k1,1 -n | \
+#   python ${PYDIR}/parse_chembl_synonyms.py | \
+#   python ${PYDIR}/generate_syn_dictionary.py > ${CDATADIR}/syn_dict_all.txt
 #
 # 
 import time
@@ -13,7 +16,7 @@ from datahelper import Datahelper
 
 def main():
   """
-  Requires the input to be sorted on the first field.
+  Requires the input to be sorted on the first field (the numeric molregno).
   One record per molregno is output.
 
   Calls a datahelper function to normalise each word or phrase (convert to 
@@ -44,5 +47,4 @@ def main():
 start_time = time.time()
 
 count = main()
-#print "END:", time.time() - start_time, "seconds", count
 

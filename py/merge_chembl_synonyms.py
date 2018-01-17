@@ -1,12 +1,5 @@
 # 
 # Attempt to match CHEMBL synonyms with coding data
-# - Load a synonym dictionary
-# - Processing up to this point:
-#   dump_mysql_table.py --tablename=molecule_synonyms > ${CDATADIR}/molecule_synonyms.tsv
-#   (this outputs a file with no header, currently)   
-#   sort -n ${CDATADIR}/molecule_synonyms.tsv > ${CDATADIR}/molecule_synonyms_sorted.tsv
-#   
-#   
 # 
 import time
 import datetime
@@ -19,7 +12,7 @@ from datahelper import Datahelper
 
 def load_synonyms(fh):
   """
-  Load whole synonyms only into a python dictionary
+  Load WHOLE synonyms only into a python dictionary
   which will then be used as a look-up for input data
   """
   synonyms = {}
@@ -28,10 +21,14 @@ def load_synonyms(fh):
     data = line.strip().split('\t')
     syns1 = data[1].split('|')
     syns = [x.strip() for x in syns1]
-    if data[0] not in synonyms: 
-      synonyms[data[0]] = []
+    #if data[0] not in synonyms: 
+    #  synonyms[data[0]] = []
     for syn in syns:
-      synonyms[data[0]].append(syn)
+      if syn not in synonyms: 
+        synonyms[syn] = []
+      for asyn in syns:
+        if asyn not in synonyms[syn]:
+          synonyms[syn].append(asyn)
 
   return synonyms
 
@@ -44,7 +41,6 @@ def main(options):
   try:
     fh = open(options.synfile, "r")
     synonyms = load_synonyms(fh)
-    #print len(synonyms)
   except IOError as e:
     print "I/O error({0}): {1}".format(e.errno, e.strerror)
     exit()
@@ -52,7 +48,6 @@ def main(options):
     print "Missing arguments ", e
     exit()
   except:
-    #print "Unexpected error:", sys.exc_info()[0]
     print "Unexpected error:", sys.exc_info()
     exit()
 
@@ -70,9 +65,6 @@ def main(options):
     if matched == False:
       print "%s,%s" % (data[0], phrase)
 
-  #for syn in synonyms:
-  #  print "%s -> %s" % (syn, str(synonyms[syn]))
-  #  count += 1
   return count, mcount
 
 # execution flow starts here
@@ -86,5 +78,4 @@ parser.add_option("-s", "--synfile", dest="synfile",
 (options, args) = parser.parse_args()
 
 count, mcount = main(options)
-#print "END:", time.time() - start_time, "seconds", count, mcount
 

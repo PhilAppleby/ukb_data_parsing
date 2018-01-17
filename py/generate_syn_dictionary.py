@@ -1,6 +1,9 @@
 # 
 # Third step in the chembl synonym generation pipeline:
-# python ${PYDIR}/dump_mysql_table_data.py --tablename=molecule_synonyms | sort -n | python ${PYDIR}/parse_chembl_synonyms.py | python ${PYDIR}/generate_syn_dictionary.py > ${CDATADIR}/syn_dict_all.txt
+# python ${PYDIR}/chembl/dump_mysql_table_data.py --tablename=molecule_synonyms | \
+#   sort -k1,1 -n | \
+#   python ${PYDIR}/parse_chembl_synonyms.py | \
+#   python ${PYDIR}/generate_syn_dictionary.py > ${CDATADIR}/syn_dict_all.txt
 # 
 import time
 import datetime
@@ -21,7 +24,6 @@ def main():
   """
   count = 0
   synonyms = {}
-  #codes = {}
 
   for line in sys.stdin:
     data = line.strip().split(',')
@@ -30,16 +32,11 @@ def main():
     for syn in syns:
       if syn not in synonyms:
         synonyms[syn] = [] 
-        #codes[syn] = []
-      #if data[1] not in codes[syn]:
-      #  codes[syn].append(data[1])
-      for altsyn in syns:
-        if altsyn not in synonyms[syn]:
-          synonyms[syn].append(altsyn)
-        
+      for other_syn in syns:
+        if other_syn not in synonyms[syn]:
+          synonyms[syn].append(other_syn)
 
   for syn in sorted(synonyms):
-    #print "%s\t%s\t%s" % (syn, '|'.join(synonyms[syn]), '|'.join(codes[syn]))
     print "%s\t%s" % (syn, '|'.join(set(synonyms[syn])))
     count += 1
   return count
@@ -48,5 +45,4 @@ def main():
 #
 start_time = time.time()
 count = main()
-#print "END:", time.time() - start_time, "seconds", count
 

@@ -356,10 +356,12 @@ class Datahelper:
     """
 #   temporary - attempted matches
     attempted_matches = []
+    phrase_attempts = {}
     phrase = ""
     step = "A"
     # ALL full phrases 
     for phrase in inphrases:
+      phrase_attempts[phrase] = 1
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
         match_choices = self.cls_phrases[phrase]
@@ -369,16 +371,11 @@ class Datahelper:
     # Normalised version of ALL all full phrases 
     phrases = [self.get_normalised_phrase(p) for p in inphrases]
 
-    # all normalised phrases 
-    #for phrase in phrases:
-    #  attempted_matches.append(phrase)
-    #  if phrase in self.cls_phrases:
-    #    return self.get_most_common(self.cls_phrases[phrase]), attempted_matches
-
     # 3 all prefix trigrams 
     step = "3"
     for ngram in [p.split()[0:3] for p in phrases if len(p.split()) > 2]:
       phrase = ' '.join(ngram)
+      phrase_attempts[phrase] = 1
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
         match_choices = self.cls_phrases[phrase]
@@ -388,6 +385,7 @@ class Datahelper:
     step = "2"
     for ngram in [p.split()[0:2] for p in phrases if len(p.split()) > 1]:
       phrase = ' '.join(ngram)
+      phrase_attempts[phrase] = 1
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
         match_choices = self.cls_phrases[phrase]
@@ -397,8 +395,10 @@ class Datahelper:
     step = "1"
     for phr_elem in phrases:
       #print phr_elem.split()
-      for phrase in [w for w in phr_elem.split() if self.isExcluded(w.strip()) == False]:
+      for phrase in [w.strip() for w in phr_elem.split() 
+          if self.isExcluded(w.strip()) == False and w.strip() not in phrase_attempts]:
         #print "***", phrase
+        phrase_attempts[phrase] = 1
         attempted_matches.append(phrase + ':' + step)
         if phrase in self.cls_phrases:
           match_choices = self.cls_phrases[phrase]
