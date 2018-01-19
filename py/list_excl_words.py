@@ -25,8 +25,15 @@ def main():
 
   ewords = dh.get_excluded_words()
 
+  count = 0
+  outarray = []
   for wd in ewords:
-    print wd
+    count += 1
+    outarray.append(wd)
+    if count % 4 == 0:
+      print ",".join(outarray)
+      outarray = []
+  print ",".join(outarray)
 
   return 
 

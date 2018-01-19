@@ -5,24 +5,11 @@ from collections import Counter
 # generating dictionary and matching keys,
 # listing exclusion words and applying exclusion rules
 # 
-#
-# Problematic Words and Phrases (may end up excluding these for
-# certain code systems)
-#
-# cyclosporin
-# diflucan
-# ethinyloestradiol
-# vibramycin
-# clioquinol
-# decongestant
-# erythomycin
-# ethinylestradiol
-# oestradiol
-#
 class Datahelper:
   def __init__(self):
     self.cls_phrases = {}
-# Explicit exclusions - short words and measures are taken out elsewhere
+    # Explicit exclusions - short words and measures are excluded in code
+    # NLP systems / libraries, such as the NLTK, refer to these as "stop-words"
     self.excluded_words = {
       'acting': 1,
       'active': 1,
@@ -34,6 +21,7 @@ class Datahelper:
       'biscuit': 1,
       'biscuits': 1,
       'good': 1,
+      'soft': 1,
       'choice': 1,
       'house': 1,
       'half': 1,
@@ -69,7 +57,13 @@ class Datahelper:
 #      'aloe': 1,
       'vera': 1,
       'infusion': 1,
+      'succinate': 1,
+      'palmitate': 1,
+      'intensol': 1,
+      'poly': 1,
       'prep': 1,
+      'bag': 1,
+      'bags': 1,
       'preparation': 1,
       'preparations': 1,
       'preps': 1,
@@ -81,6 +75,7 @@ class Datahelper:
       'solution': 1,
       'soln': 1,
       'contact': 1,
+      'incontinence': 1,
       'diluent': 1,
       'blocker': 1,
       'emulsion': 1,
@@ -92,6 +87,7 @@ class Datahelper:
       'aveeno': 1,
       'soluble': 1,
       'suspension': 1,
+      'susp': 1,
       'various': 1,
       'paint': 1,
       'liquid': 1,
@@ -132,6 +128,7 @@ class Datahelper:
       'autohaler': 1,
       'turbohaler': 1,
       'inhaler': 1,
+      'sach': 1,
       'sachet': 1,
       'sachets': 1,
       'syrup': 1,
@@ -182,6 +179,8 @@ class Datahelper:
       'relief': 1,
       'wool': 1,
       'sand': 1,
+      'tube': 1,
+      'stnd': 1,
       'aloe': 1,
       'ortho': 1,
       'auto': 1,
@@ -208,6 +207,7 @@ class Datahelper:
       'buff': 1,
       'golden': 1,
       'white': 1,
+      'paed': 1,
       'paediatric': 1,
       'peppermint': 1,
       'mint': 1,
@@ -244,6 +244,7 @@ class Datahelper:
       'aluminium': 1,
       'calcium': 1,
       'sodium': 1,
+      'cromoglycate': 1,
       'potassium': 1,
       'chloride': 1,
       'nitrate': 1,
@@ -252,6 +253,8 @@ class Datahelper:
       'disodium': 1,
       'zinc': 1,
       'magnesium': 1,
+      'breathe': 1,
+      'wound': 1,
 #      'betamethasone': 1,
 #      'dexamethasone': 1,
 #      'hydrocortisone': 1,
@@ -305,13 +308,19 @@ class Datahelper:
       'deep': 1,
       'ultra': 1,
       'daktarin': 1,
+      'voltarol': 1,
+      'insulin': 1,
+      'panoxyl': 1,
     }
     self.valid_short_words = {
       'gtn': 1,
     }
 
   def load_cls_phrases(self, fh):
-    #hdr = fh.readline()
+    """
+    Build a dictionary of key phrases and words vs lists of codes from
+    Classification System Data: see self.get_key_list(phrase)
+    """
     for line in fh:
       data = line.strip().split(',')
       # guards against unparseable lines
@@ -324,15 +333,11 @@ class Datahelper:
         for syn in [s for s in syn_array if s not in phrase_array]:
           phrase_array.append(syn) 
 
-      #already_seen = {} 
       for phrase in phrase_array:
         for key in set(self.get_key_list(phrase)):
-          #print "LOAD %s" % (key)
           if key not in self.cls_phrases:
             self.cls_phrases[key] = []
-          #if code not in already_seen:
           self.cls_phrases[key].append(code)
-          #already_seen[code] = 1
 
     return len(self.cls_phrases)
 
@@ -352,7 +357,8 @@ class Datahelper:
     bigrams, then single words 
 
     Return:
-    A matched code from the classification system or None
+    A list of matched_code counts, a match_path, the matched phrase, the
+    most commonly matched code(s) OR 
     """
 #   temporary - attempted matches
     attempted_matches = []
@@ -366,7 +372,8 @@ class Datahelper:
       if phrase in self.cls_phrases:
         match_choices = self.cls_phrases[phrase]
         #return match_choices, attempted_matches, phrase
-        return self.get_list_counts(match_choices), attempted_matches, phrase, self.get_most_common(match_choices)
+        return (self.get_list_counts(match_choices), attempted_matches, 
+          phrase, self.get_most_common(match_choices))
 
     # Normalised version of ALL all full phrases 
     phrases = [self.get_normalised_phrase(p) for p in inphrases]
@@ -379,7 +386,8 @@ class Datahelper:
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
         match_choices = self.cls_phrases[phrase]
-        return self.get_list_counts(match_choices), attempted_matches, phrase, self.get_most_common(match_choices)
+        return (self.get_list_counts(match_choices), attempted_matches, 
+          phrase, self.get_most_common(match_choices))
 
     # 2 all prefix bigrams 
     step = "2"
@@ -389,7 +397,8 @@ class Datahelper:
       attempted_matches.append(phrase + ':' + step)
       if phrase in self.cls_phrases:
         match_choices = self.cls_phrases[phrase]
-        return self.get_list_counts(match_choices), attempted_matches, phrase, self.get_most_common(match_choices)
+        return (self.get_list_counts(match_choices), attempted_matches, 
+          phrase, self.get_most_common(match_choices))
 
     # 1 all valid words 
     step = "1"
@@ -402,7 +411,8 @@ class Datahelper:
         attempted_matches.append(phrase + ':' + step)
         if phrase in self.cls_phrases:
           match_choices = self.cls_phrases[phrase]
-          return self.get_list_counts(match_choices), attempted_matches, phrase, self.get_most_common(match_choices)
+          return (self.get_list_counts(match_choices), attempted_matches, 
+            phrase, self.get_most_common(match_choices))
 
     return [], attempted_matches, phrase, None
 
@@ -487,15 +497,23 @@ class Datahelper:
 
   def isExcluded(self, word):
     """
+    Used in the main match
     """
     #print word
-    return (self.isExcludedWord(word) != False) or (self.isMeasure(word) != False) or (self.isAllDigits(word) != False) or (self.isShortWord(word) != False)
+    return ((self.isExcludedWord(word) != False) 
+        or (self.isMeasure(word) != False) 
+        or (self.isAllDigits(word) != False) 
+        or (self.isShortWord(word) != False))
 
   def isExcludedFromMerge(self, word):
     """
+    Used when buliding dictionaries for use in 
+    synonym merging
     """
     #print word
-    return (self.isExcludedWord(word) != False) or (self.isMeasure(word) != False) or (self.isShortWord(word) != False)
+    return ((self.isExcludedWord(word) != False) 
+        or (self.isMeasure(word) != False) 
+        or (self.isShortWord(word) != False))
 
   def isExcludedWord(self, word):
     """
@@ -533,7 +551,11 @@ class Datahelper:
   	return re.sub(r' +', '_', words).lower()
 
   def get_normalised_phrase(self, sentence):
-  	return re.sub(r'[\W_ ]+', ' ', sentence).lower()
+    """
+    Regex to replace (multiples of) 
+    non-word characters and space with a single space 
+    """
+    return re.sub(r'[\W_ ]+', ' ', sentence).lower()
 
   def format_bnf_code(self, code, level=3):
     code = code.strip()
@@ -557,8 +579,7 @@ class Datahelper:
 
   def isAllDigits(self, word):
     """
-    Does the word begin with a series of at least 1 digit (can be followed by
-    anything or nothing)
+    Does the word consist of only digits?
     """
     return ((re.match('^\d+$', word)) != None) 
 
@@ -570,9 +591,6 @@ class Datahelper:
 
   def isSingleLetter(self, word):
     """
-    Check if the word consists of a single letter (generated by string
-    normalisation)
+    Check if the word consists of a single letter?
     """
     return (re.match('^\w$', word)) != None
-
-

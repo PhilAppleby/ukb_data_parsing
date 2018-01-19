@@ -7,5 +7,5 @@ source ${PROJROOT}/env/common
 # 
 #
 cat ${UDATADIR}/medication_coding_synonyms.csv | \
-	python ${PYDIR}/dt_match.py --clsfile=${CDATADIR}/atc_who_desc_synonyms.csv > \
+	python ${PYDIR}/code_data_match.py --clsfile=${CDATADIR}/atc_who_desc_synonyms.csv > \
 	${DATADIR}/results/atc_res.csv
