@@ -6,6 +6,9 @@ source ${PROJROOT}/env/common
 # and to combine automatically matched data with manually 
 # assigned codes
 #
+# Just get the matches from the manually edited file
+egrep -vw "UKBB_code|NA" ${DATADIR}/results/atc_all_manual_matches.csv > \
+  ${DATADIR}/results/atc_manual_matches.csv
 # Cut relevant columns
 cut -f 1,2,5 -d ',' ${DATADIR}/results/atc_manual_matches.csv > \
   ${DATADIR}/results/atc_manual_matches_cut.csv
@@ -13,7 +16,7 @@ cut -f 1,2,6 -d ',' ${DATADIR}/results/atc_matched.csv > \
   ${DATADIR}/results/atc_auto_matches_cut.csv
 
 # Combine auto and manually matched codes
-cat ${DATADIR}/results/atc_auto_matches_2_cut.csv \
+cat ${DATADIR}/results/atc_auto_matches_cut.csv \
   ${DATADIR}/results/atc_manual_matches_cut.csv > \
   ${DATADIR}/results/atc_all_matches.csv 
 

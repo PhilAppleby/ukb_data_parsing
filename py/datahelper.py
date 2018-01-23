@@ -557,7 +557,7 @@ class Datahelper:
     """
     return re.sub(r'[\W_ ]+', ' ', sentence).lower()
 
-  def format_bnf_code(self, code, level=3):
+  def format_digit_code(self, code, level=3):
     code = code.strip()
     ch = code[0:2]
     s = code[2:4]

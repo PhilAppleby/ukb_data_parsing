@@ -1,12 +1,6 @@
 #
-# Reduce words in a BNF code description to keyword versus
-# formatted BNF code dictionaries
-#
 # Dictionaries:
 # 
-# Start with whole words extracted from the name field vs formatted BNF codes
-# Could then: match partial words by sorting left / right truncations as keys.
-#
 # Classification system code file data fields:
 # 1 the code
 # 2 the description
