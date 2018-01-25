@@ -33,7 +33,9 @@ def main():
     if count % 4 == 0:
       print ",".join(outarray)
       outarray = []
-  print ",".join(outarray)
+  if len(outarray) > 0:
+    print ",".join(outarray)
+  print count
 
   return 
 

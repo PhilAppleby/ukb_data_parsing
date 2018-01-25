@@ -1,4 +1,4 @@
-#!/bin/sh
+e!/bin/sh
 source ${PROJROOT}/env/common
 #
 # All steps to run through data preparation, ATC and UKBB data synonym merging,
