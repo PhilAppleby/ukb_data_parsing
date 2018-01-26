@@ -1,0 +1,15 @@
+export DATADIR=${PROJDATA}/
+export BDATADIR=${PROJDATA}/bnf_archive
+export UKBPDIR=${PROJDATA}/ukb_pheno
+export UDATADIR=${PROJDATA}/ukb
+export CDATADIR=${PROJDATA}/chembl
+export MDATADIR=${PROJDATA}/ukb_pheno/pheno_devel
+export PDATADIR=${PROJDATA}/ukb_pheno/pheno_devel
+export PYDIR=${PROJROOT}/py
+export PYTHONPATH=${PYDIR}:${PYTHONPATH}
+export SHDIR=${PROJROOT}/sh
+export CHHOST=
+export CHPORT=
+export CHDB=chembldb23
+export CHUSER=
+export CHPWD=

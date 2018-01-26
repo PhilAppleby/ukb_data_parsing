@@ -7,7 +7,7 @@ source ${PROJROOT}/env/common
 # G58 Other mononeuropathies
 # G59 Mononeuropathy in diseases classified elsewhere
 #
-egrep "G56|G57|G58|G59" ${UKBPDIR}/ukb_pheno_hes_diagnoses_icd10_data_n.csv > \
+egrep ",G56|,G57|,G58|,G59" ${UKBPDIR}/ukb_pheno_hes_diagnoses_icd10_data_n.csv > \
   ${PDATADIR}/neuropathy/participant_codes_list.csv
 #
 cut -f 1 -d',' ${PDATADIR}/neuropathy/participant_codes_list.csv | \

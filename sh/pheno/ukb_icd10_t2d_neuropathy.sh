@@ -72,6 +72,12 @@ echo "Set operation via 'comm' - eliminate candidate controls taking\
 comm -23 ${MDATADIR}/t2d/candidate_controls.txt \
   ${MDATADIR}/t2d_excluded/all_participants_taking_np_excl_drugs.txt > \
   ${MDATADIR}/t2d/controls.txt
+# -----------------------------------------------------------------
+echo "Build a Binary phenotype file (cases=1, controls=0)"
+# -----------------------------------------------------------------
+echo -e "FID\tIID\tT2D_with_neuropathy" > ${MDATADIR}/t2d/phenotypes.tsv
+perl -pe 's/(\d+)/$1\t$1\t0/g' ${MDATADIR}/t2d/controls.txt >> ${MDATADIR}/t2d/phenotypes.tsv
+perl -pe 's/(\d+)/$1\t$1\t1/g' ${MDATADIR}/t2d/cases.txt >> ${MDATADIR}/t2d/phenotypes.tsv
 
 
 
