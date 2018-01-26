@@ -1,6 +1,6 @@
 #
 # Trim ATC code to formatted version
-# Calls a datahelper function
+# Calls d function in the datahelper class
 #
 import time
 import datetime

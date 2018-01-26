@@ -352,13 +352,16 @@ class Datahelper:
 
   def match_all_phrases(self, inphrases):
     """
+    The most complicated function
     Attempt to match the argument phrases to the cls_phrases dictionary 
     First attempt a match of all phrase, then all trigrams, then all
     bigrams, then single words 
 
     Return:
-    A list of matched_code counts, a match_path, the matched phrase, the
-    most commonly matched code(s) OR 
+    A list of matched_code counts, match_path, the matched phrase, the
+    most commonly matched code(s) 
+    OR 
+    [], match path, last attempted match, None
     """
 #   temporary - attempted matches
     attempted_matches = []
@@ -418,6 +421,7 @@ class Datahelper:
 
   def match_phrase(self, phrase):
     """
+    NOT USED CURRENTLY
     Attempt to match the argument phrase to the cls_phrases dictionary 
     (built from all words passed in at init time)
     A phrase is matched iff:
@@ -465,6 +469,9 @@ class Datahelper:
     return key_list
 
   def get_merge_key_list(self, phrase):
+    """
+    Get a list of keys for use while merging synonyms
+    """
     key_list = []
     if self.isExcludedFromMerge(phrase) == False:
       #print "KEY (1) %s" % (phrase)
@@ -489,6 +496,9 @@ class Datahelper:
     return key_list
 
   def get_key_list_whole_phrases(self, phrase):
+    """
+    EXPERIMENTAL: Get a list of keys from whole phrases
+    """
     key_list = [phrase]
     ngram = self.get_normalised_phrase(phrase)
     key_list.append(ngram)
@@ -523,6 +533,7 @@ class Datahelper:
   def get_most_common(self, lst):
     """
     Return the most commonly occuring value in a list
+    THIS NEEDS RE-IMPLEMENTING - not currently used
     """
     data = Counter(lst)
     mc = data.most_common(2) 

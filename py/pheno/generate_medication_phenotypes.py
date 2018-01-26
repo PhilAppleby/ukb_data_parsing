@@ -1,5 +1,12 @@
 # 
-# 
+# Generate binary phenotypes from the set of UKB
+# participants reporting taking medications
+# Load the column list as a code vs num array
+#
+# For each person, output a line which has 0's
+# where the person has taken no medication in a category
+# and 1's where they have
+# HOW TO PROPERLY QC THIS?
 import time
 import datetime
 import re

@@ -1,5 +1,6 @@
 #
-# 
+# Simply chops the ATC code to the required length
+# There must be an easier way ...
 #
 import time
 import os, sys

@@ -15,6 +15,12 @@ from optparse import OptionParser
 from datahelper import Datahelper
 
 def main(options):
+  """
+  The main match process - look up descriptions and 
+  synonyms in the coding data dictionary (loaded
+  on initialisation
+  SEE ALSO: datahelper.py
+  """
   dcount = 0
   count = 0
   match_count = 0
@@ -39,9 +45,6 @@ def main(options):
     exit()
 
   # stdin used to read in medications coding data
-  #sd = dh.get_phrase_dictionary()
-  #for key in sd:
-  #  print key
   hdr = sys.stdin.readline()
   for line in sys.stdin:
     count += 1
@@ -54,9 +57,9 @@ def main(options):
     match_string = ""
     code_array, match_data, last_match, selected_code = dh.match_all_phrases(all_phrases)
     if len(code_array) > 0:
+    # Current policy: output one line per code match (can be multiple per input record
       for code_elem in code_array:
         code_data = code_elem.split("~")
-        #print "%s,%s,%s,%s,%s,%s,%d" % (data[0], data[1], last_match, '|'.join(match_data), '|'.join(code_array), selected_code, len(code_array))
         print "%s,%s,%s,%s,%s,%s,%d" % (data[0], data[1], last_match, '|'.join(match_data), code_data[1], code_data[0], len(code_array))
       match_count += 1
     else:      

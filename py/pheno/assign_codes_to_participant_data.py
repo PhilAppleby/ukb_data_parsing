@@ -1,4 +1,6 @@
 # 
+# Assign Classification System codes to participant data
+# Outputs "NA" where no code is present
 # 
 import time
 import datetime

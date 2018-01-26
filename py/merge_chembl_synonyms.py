@@ -14,6 +14,8 @@ def load_synonyms(fh):
   """
   Load WHOLE synonyms only into a python dictionary
   which will then be used as a look-up for input data
+  Output coding data with synonyms attached, 
+  where possible
   """
   synonyms = {}
 
