@@ -1,6 +1,6 @@
 # UK Biobank Self Reported Medication Data parsing and matching
 
-## NOTE: ## this repository is superseded by: [https://github.com/PhilAppleby/ukbb-srmed](UKBB-srmed)
+## NOTE: ## this repository is superseded by: [../ukbb-srmed](UKBB-srmed)
 
 ## Overview
 Code to match UK biobank (UKBB) Self-Reported Medication (SRMed) descriptions with descriptions from a classification system. Data from the Anatomical Therapeutic Chemical (ATC) classification system defined by the WHO and code data from the British National Formulary (BNF) have been tested against during development.
